@@ -75,7 +75,8 @@ ERRORS = [
 
 @pytest.mark.parametrize("name,cart,expected", CASES, ids=[c[0] for c in CASES])
 def test_quote(name, cart, expected):
-    assert quote(cart) == expected, f"cart={cart}"
+    got = quote(cart)
+    assert got == expected, f"cart={cart} got={got} expected={expected}"
 
 
 @pytest.mark.parametrize("name,cart", ERRORS, ids=[e[0] for e in ERRORS])

@@ -71,7 +71,30 @@ def verified(max_iterations: int = 10) -> Run:
     return run.finish("max iterations")
 
 
-LOOPS = {"one_shot": one_shot, "naive": naive, "verified": verified}
+# 3. Budgets: a hard cap on iterations AND dollars, and a breaker that stops a loop that stopped improving.
+def budgeted(max_iterations: int = 8, max_dollars: float = 0.05, patience: int = 3) -> Run:
+    run = Run()
+    messages = [{"role": "user", "content": SPEC}]
+    best, stale = -1, 0
+    while True:
+        if run.iterations >= max_iterations:
+            return run.finish("max iterations")
+        if run.cost >= max_dollars:
+            return run.finish("budget")
+        t = work(messages)
+        report = verify(t.code)
+        run.add(t, f"· tests {report.passed}/{report.total}")
+        if report.green:
+            return run.finish("tests pass")
+        best, stale = (report.passed, 0) if report.passed > best else (best, stale + 1)
+        if stale >= patience:
+            return run.finish("no progress")
+        messages += [{"role": "assistant", "content": t.text},
+                     {"role": "user", "content": f"{report.passed}/{report.total} tests pass. Failing:\n"
+                                                 f"{report.failures}\n\nFix quote.py."}]
+
+
+LOOPS = {"one_shot": one_shot, "naive": naive, "verified": verified, "budgeted": budgeted}
 
 if __name__ == "__main__":
     run = LOOPS[sys.argv[1] if len(sys.argv) > 1 else "naive"]()
