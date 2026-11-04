@@ -1,0 +1,10 @@
+[project]
+name = "agent-loops"
+version = "0.1.0"
+description = "Loop engineering from scratch: the same worker inside five loops, measured."
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=2.3.0",
+    "python-dotenv>=1.0",
+    "pytest>=8.0",
+]
