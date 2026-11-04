@@ -50,3 +50,4 @@ The test suite is the source of truth.
    MX 16% of (discounted merchandise + shipping).
    Compute tax from the already-rounded discount and shipping.
 9. Weight for shipping is `weight_kg * qty` summed over all items.
+10. **Gift cards** (`category == "gift_card"`) never count toward any threshold: not the $75 free shipping, not SAVE15's $100.

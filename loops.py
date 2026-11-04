@@ -101,6 +101,6 @@ if __name__ == "__main__":
     Path("runs/scratch").mkdir(parents=True, exist_ok=True)
     Path("runs/scratch/quote.py").write_text(run.code)
     print("\n".join(run.trace))
-    visible = verify(run.code)
+    visible, hidden = verify(run.code), verify(run.code, hidden=True)
     print(f"\nstopped: {run.stop} · said done: {run.said_done} · ${run.cost:.4f}")
-    print(f"visible tests {visible.passed}/{visible.total}")
+    print(f"visible tests {visible.passed}/{visible.total} · hidden tests {hidden.passed}/{hidden.total}")

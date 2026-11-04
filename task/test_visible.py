@@ -63,6 +63,9 @@ CASES = [
     ('holiday_cutoff_min',
      {'items': [{'sku': 'KT-01', 'price': 89.0, 'qty': 1, 'weight_kg': 1.4, 'category': 'kettles'}], 'country': 'US', 'date': '2026-12-20'},
      {'subtotal': 89.0, 'discount': 0.0, 'shipping': 9.99, 'tax': 7.92, 'total': 106.91}),
+    ('gift_card_no_free_shipping',
+     {'items': [{'sku': 'GC-50', 'price': 60.0, 'qty': 1, 'weight_kg': 0.0, 'category': 'gift_card'}, {'sku': 'MG-02', 'price': 30.0, 'qty': 1, 'weight_kg': 0.4, 'category': 'mugs'}], 'country': 'US', 'date': '2026-11-04'},
+     {'subtotal': 90.0, 'discount': 0.0, 'shipping': 5.99, 'tax': 2.88, 'total': 98.87}),
 ]
 
 ERRORS = [
