@@ -94,7 +94,37 @@ def budgeted(max_iterations: int = 8, max_dollars: float = 0.05, patience: int =
                                                  f"{report.failures}\n\nFix quote.py."}]
 
 
-LOOPS = {"one_shot": one_shot, "naive": naive, "verified": verified, "budgeted": budgeted}
+# 4. Fresh context: every iteration starts a NEW conversation, rebuilt from the state the loop keeps:
+#    the spec, the current file, the latest failures, and notes on what was learned (Ralph keeps these in files).
+def brief(code: str, failures: str, notes: list) -> str:
+    learned = "\n".join(f"- {n}" for n in notes) or "- nothing yet"
+    return (f"{SPEC}\n\n## Current quote.py\n```python\n{code}\n```\n\n"
+            f"## Failing tests\n{failures}\n\n## What earlier attempts learned\n{learned}\n\n"
+            "Fix quote.py. Before the code, write one line starting with LEARNED: that states the rule you inferred.")
+
+
+def fresh(max_iterations: int = 8, max_dollars: float = 0.05, patience: int = 3) -> Run:
+    run = Run()
+    messages = [{"role": "user", "content": SPEC}]
+    best, stale, notes = -1, 0, []
+    while True:
+        if run.iterations >= max_iterations:
+            return run.finish("max iterations")
+        if run.cost >= max_dollars:
+            return run.finish("budget")
+        t = work(messages)
+        report = verify(t.code)
+        run.add(t, f"· tests {report.passed}/{report.total}")
+        if report.green:
+            return run.finish("tests pass")
+        best, stale = (report.passed, 0) if report.passed > best else (best, stale + 1)
+        if stale >= patience:
+            return run.finish("no progress")
+        notes += [l.removeprefix("LEARNED:").strip() for l in t.text.splitlines() if l.startswith("LEARNED:")]
+        messages = [{"role": "user", "content": brief(run.code, report.failures, notes)}]
+
+
+LOOPS = {"one_shot": one_shot, "naive": naive, "verified": verified, "budgeted": budgeted, "fresh": fresh}
 
 if __name__ == "__main__":
     run = LOOPS[sys.argv[1] if len(sys.argv) > 1 else "naive"]()
