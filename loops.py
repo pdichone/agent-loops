@@ -55,7 +55,23 @@ def naive(max_iterations: int = 10) -> Run:
     return run.finish("max iterations")
 
 
-LOOPS = {"one_shot": one_shot, "naive": naive}
+# 2. The verified loop: the TESTS decide when it's done, and the failures go back to the model.
+def verified(max_iterations: int = 10) -> Run:
+    run = Run()
+    messages = [{"role": "user", "content": SPEC}]
+    while run.iterations < max_iterations:
+        t = work(messages)
+        report = verify(t.code)
+        run.add(t, f"· tests {report.passed}/{report.total}")
+        if report.green:
+            return run.finish("tests pass")
+        messages += [{"role": "assistant", "content": t.text},
+                     {"role": "user", "content": f"{report.passed}/{report.total} tests pass. Failing:\n"
+                                                 f"{report.failures}\n\nFix quote.py."}]
+    return run.finish("max iterations")
+
+
+LOOPS = {"one_shot": one_shot, "naive": naive, "verified": verified}
 
 if __name__ == "__main__":
     run = LOOPS[sys.argv[1] if len(sys.argv) > 1 else "naive"]()
